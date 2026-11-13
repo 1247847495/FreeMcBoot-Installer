@@ -1,0 +1,70 @@
+Nenhum Memory Card de Playstation 2 detectado.
+Foram detectados os Memory Cards no slot 1 e 2.\nEscolha o Memory Card
+O FMCB ser� instalado no memory card do slot 1.\nDeseja continuar?
+O FMCB ser� instalado no memory card do slot 2.\nDeseja continuar?
+O FHDB ser� instalado no Disco-R�gido.\nDeseja Continuar?
+Instalar FreeMcBoot para:
+Falha na inicializa��o do cache.
+Uma FMCB CNF foi encontrada!\nVoc� deseja continuar ela?
+Uma FHDB CNF foi encontrada!\nVoc� deseja continuar ela?
+Falha ao limpar.
+A Instala��o do FMCB foi apagada com sucesso.
+Falha ao Instalar.
+Instala��o Completa.
+O FMCB ser� instalado no memory card do slot 1 ser� apagado.\nDeseja continuar?
+O FMCB ser� instalado no memory card do slot 2 ser� apagado.\nDeseja continuar?
+O FHDB no Disco-R�gido ser� apagado.\nDeseja Continuar?
+O memory card do slot 1 ser� formatado. Deseja Continuar?
+O memory card do slot 2 ser� formatado. Deseja Continuar?
+Erro ao Formatar.
+Formata��o Completa.
+Ser� criado uma imagem do memory card do slot 1.\nDeseja Continuar?
+Ser� criado uma imagem do memory card do slot 2.\nDeseja Continuar?
+Falha ao criar imagem do Memory card.
+Imagem do Memory card Criada com sucesso.
+A imagem do memory card do slot 1 ser� restaurada.\nDeseja Continuar?
+A imagem do memory card do slot 2 ser� restaurada.\nDeseja Continuar?
+Falha ao Restaurar imagem do Memory card.
+Imagem do Memory card restaurado com sucesso.
+Multi-instala��o requisitada, mas n�o foi encontrada no Memory Card.
+Multi-instala��o requisitada!\nPor favor Desinstale primeiro.
+Falha ao Calcular espa�os livres no Memory Card.
+Espa�o insuficiente no Memory Card.
+Espa�o insuficiente no Drive do Disco-R�gido.
+Espa�o insuficiente no na parti��o de APPS.
+Formatando o memory card. Por favor n�o desligue o console e nem remova o Memory Card.
+Apagando o Memory Card. Por favor n�o desligue o console e nem remova o Memory Card.
+Desinstalando o FHDB.\n\nPor favor n�o desligue e nem desconecte a unidade de HDD.
+Erro na leitura.\nPor favor verifique a m�dia de instala��o.
+Erro da Escrita.\nPor favor verifique seu Memory Card.
+Erro na leitura.\nPor favor verifique seu Memory Card.
+Erro da Escrita.\nPor favor verifique a unidade de HDD.
+Erro da Escrita.\nPor favor verifique a m�dia de instala��o.
+Sem mem�ria.
+Arquivo n�o encontrado.\nPor favor verifique a m�dia de instala��o.
+Parar a cria��o de imagem do memory card?
+Parar a Restaura��o da imagem do memory card?
+Falha ao criar Arquivos vinculados.
+Falha ao vincular os arquivos para o Memory Card.
+N�o pode remover a multi-instala��o feita por um instalador incompat�vel.
+Instalar o FMCB para este console.
+Instalar o FMCB para todos os consoles.
+Desinstalar o FMCB.
+Fazer um Downgrade da multi-instala��o para uma instala��o normal.
+Formatar o memory card.
+Criar uma imagem do memory card para um arquivo.
+Restaurar a imagem no memory card do arquivo.
+Instalar o FMCB (PSX) neste memory card.
+Instala o FHDB para este console.
+Desinstala o FHDB.
+Sair do Programa.
+H� um problema na unidade do Disci-R�gido.\nfa�a uma verifica��o primeiro.
+S.M.A.R.T. reportou que a unidade do Disco-R�gido falhou.\n\nO HDD precisa ser substitu�do.
+Este console n�o suporta o FMCB.\n\nMesmo que voc� tente fazer a instala��o, � melhor comprar outro.
+Enquanto a Multi-Instala��o permite voc� criar dados do FMCB que pode ser usado em todos os PlayStation 2 com o m�nimo de espa�o requisitados, e for contra a regra requisitada do Memory Card por introdu��o controlada podem corromper os arquivos de sistema.\n\n� fortemente recomendado que fa�a uma instala��o normal.
+Sair do Programa?
+A unidade de disco r�gido (HDD) n�o est� formatada. Formatar?\nAviso: todos os dados ser�o apagados!
+Erro ao formatar a unidade de disco r�gido (HDD).
+Formatar a unidade de disco r�gido (HDD)\nAviso: todos os dados ser�o apagados!
+Formatar HDD e criar parti��es b�sicas
+O instalador detectou que seu console � um modelo muito raro\nSe voc� quiser colaborar com a comunidade do PS2 por favor entre em contato comigo:\n\nhttps://github.com/israpps

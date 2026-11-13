@@ -1,0 +1,52 @@
+OK
+Cancelar
+Sim
+N�o
+Pr�ximo
+Voltar
+Habilitado
+Desabilitado
+Alternar op��o
+Escolher campo
+Alerta
+Erro
+Informa��o
+Confirma��o
+Slot 1
+Slot 2
+Memory Card
+HDD
+Por favor aguardar
+Instalando...
+Criando Imagem...
+Restaurando Imagem...
+Seu PS2 e modelos similares
+Qualquer PS2 da mesma regi�o
+Qualquer PS2
+Taxa:
+Tempo\nrestante:
+Instalar
+Multi-instala��o
+Desinstalar o FMCB
+Desinstalar o MI
+Formatara o MC
+Criar imagem do MC
+Restaurar o MC
+Instalar o FMCB (PSX)
+Instalar o FHDB
+Desinstalar o FHDB
+Sair
+B
+KB
+MB
+GB
+TB
+B/s
+KB/s
+MB/s
+Espa�o Dispon�vel:
+Espa�o Requisitado:
+Menu Principal
+Menu Extra
+Menu do Memory Card
+Formatar HDD

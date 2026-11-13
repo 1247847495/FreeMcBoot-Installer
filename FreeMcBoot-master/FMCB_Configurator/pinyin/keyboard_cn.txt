@@ -1,0 +1,285 @@
+int keyboard(char *out, int max)
+{
+	int event, post_event=0;
+	const int	WFONTS=10, HFONTS=3,
+			SYM_W=13, SYM_H=5, SYM_PAGE=SYM_W*SYM_H,
+			CELL_W=28, CELL_H=20,
+			KEY_W = LINE_THICKNESS+8+WFONTS*CELL_W+8+LINE_THICKNESS,
+			KEY_H = LINE_THICKNESS + 1 + FONT_HEIGHT*3 + 1
+			      + LINE_THICKNESS + 8 + FONT_HEIGHT + 4
+			      + 18 + 8 + HFONTS*CELL_H + 8
+			      + FONT_HEIGHT + 8 + LINE_THICKNESS,
+			KEY_X = ((SCREEN_WIDTH - KEY_W)/2) & -2,
+			KEY_Y = ((SCREEN_HEIGHT - KEY_H)/2)& -2;
+	const int	OUT_W = KEY_W - (LINE_THICKNESS+3)*2,
+			out_y  = KEY_Y + LINE_THICKNESS + 1,
+			py_y   = out_y + FONT_HEIGHT*3 + 1 + LINE_THICKNESS + 8,
+			cand_y = py_y + FONT_HEIGHT + 4,
+			key_y  = cand_y + 18 + 8,
+			ok_y   = key_y + HFONTS*CELL_H + 8;
+	char *KEY="qwertyuiop"
+	          "asdfghjkl"
+	          "zxcvbnm";
+	char py[8];
+	char tmp[128];
+	int pylen=0, sel=0, cur, i, x, y, t=0;
+	int cand_idx=0, cand_total=0, page_count=0;
+	unsigned short cand[9];
+	int sym_mode=0, sym_page=0;
+
+	sym_pages = (CN_SYM_COUNT + SYM_PAGE - 1) / SYM_PAGE;
+	cur = strlen(out);
+	py[0] = 0;
+
+	event = 1;  //event = initial entry
+	while(1){
+		//Pad response section
+		waitPadReady(0, 0);
+		if(readpad()){
+			if(new_pad)
+				event |= 2;  //event |= pad command
+			if(new_pad & PAD_UP){
+				if(sel >= WFONTS*HFONTS)
+					sel = WFONTS*(HFONTS-1);
+				else if(sel >= WFONTS)
+					sel -= WFONTS;
+			}else if(new_pad & PAD_DOWN){
+				if(sel < WFONTS*(HFONTS-1))
+					sel += WFONTS;
+				else if(sel < WFONTS*HFONTS)
+					sel = (sel%WFONTS < WFONTS/2) ? WFONTS*HFONTS : WFONTS*HFONTS+1;
+			}else if(new_pad & PAD_LEFT){
+				if(sel > 0)
+					sel--;
+			}else if(new_pad & PAD_RIGHT){
+				if(sel < WFONTS*HFONTS+1)
+					sel++;
+			}else if(new_pad & PAD_START){
+				break;                          //START => OK
+			}else if(new_pad & PAD_SELECT){     //SELECT => toggle symbol page
+				sym_mode ^= 1;
+				sel = 0;
+				sym_page = 0;
+			}else if(new_pad & PAD_L1){
+				if(sym_mode){
+					if(sym_page > 0) sym_page--;
+				}else if(cand_total > 0){
+					if(cand_idx > 0) cand_idx--;
+					i = cn_im_lookup(py, (cand_idx/9)*9, cand, 9);
+					cand_total = i;
+					page_count = cand_total - (cand_idx/9)*9;
+					if(page_count > 9) page_count = 9;
+				}
+			}else if(new_pad & PAD_R1){
+				if(sym_mode){
+					if(sym_page < sym_pages-1) sym_page++;
+				}else if(cand_total > 0){
+					if(cand_idx < cand_total-1) cand_idx++;
+					cand_total = cn_im_lookup(py, (cand_idx/9)*9, cand, 9);
+					page_count = cand_total - (cand_idx/9)*9;
+					if(page_count > 9) page_count = 9;
+				}
+			}else if((!swapKeys && new_pad & PAD_CROSS)
+			      || (swapKeys && new_pad & PAD_CIRCLE) ){
+				//Backspace: pinyin first, then output buffer (SJIS-aware)
+				if(pylen > 0){
+					py[--pylen] = 0;
+					cand_idx = 0;
+					cand_total = 0;
+					page_count = 0;
+				}else if(cur > 0){
+					int n = 1;
+					if(cur >= 2 && ((unsigned char)out[cur-2] >= 0x81)
+					   && ((unsigned char)out[cur-2] != 0xA0))
+						n = 2;  //delete whole SJIS pair
+					memmove(out+cur-n, out+cur, strlen(out)-cur+1);
+					cur -= n;
+				}
+			}else if(new_pad & PAD_SQUARE){
+				//Commit highlighted candidate
+				if(!sym_mode && pylen > 0 && page_count > 0){
+					int j = cand_idx % 9;
+					if(j < page_count && (int)strlen(out)+2 < max){
+						memmove(out+cur+2, out+cur, strlen(out)-cur+1);
+						out[cur]   = cand[j] >> 8;
+						out[cur+1] = cand[j] & 0xFF;
+						cur += 2;
+					}
+					pylen = 0;
+					py[0] = 0;
+					cand_idx = 0;
+					cand_total = 0;
+					page_count = 0;
+				}
+			}else if((swapKeys && new_pad & PAD_CROSS)
+			      || (!swapKeys && new_pad & PAD_CIRCLE) ){
+				if(sel < WFONTS*HFONTS){  //Any key in matrix selected ?
+					if(sym_mode){  //commit selected symbol/kana
+						int idx = sym_page*SYM_PAGE + sel;
+						if(idx < CN_SYM_COUNT && (int)strlen(out)+2 < max){
+							memmove(out+cur+2, out+cur, strlen(out)-cur+1);
+							out[cur]   = cn_sym_codes[idx] >> 8;
+							out[cur+1] = cn_sym_codes[idx] & 0xFF;
+							cur += 2;
+						}
+					}else{
+						if(pylen < 6){
+							py[pylen++] = KEY[sel];
+							py[pylen] = 0;
+							cand_idx = 0;
+							cand_total = cn_im_lookup(py, 0, cand, 9);
+							page_count = (cand_total > 9) ? 9 : cand_total;
+						}
+					}
+				}else if(sel == WFONTS*HFONTS){ //'OK' exit-button selected ?
+					break;                      //break out of loop with cur==strlen
+				}else  //Must be 'CANCEL' exit-button
+					return -1;
+			}else if(new_pad & PAD_TRIANGLE){
+				return -1;
+			}
+		}
+
+		t++;
+
+		if(t & 0x0F) event |= 4;  //repetitive timer event
+
+		if(event||post_event){ //NB: We need to update two frame buffers per event
+
+			//Display section
+			drawPopSprite(setting->color[0],
+				KEY_X, KEY_Y,
+				KEY_X+KEY_W-1, KEY_Y+KEY_H-1);
+			drawFrame(
+				KEY_X, KEY_Y,
+				KEY_X+KEY_W-1, KEY_Y+KEY_H-1, setting->color[1]);
+			drawOpSprite(setting->color[1],
+				KEY_X, KEY_Y+LINE_THICKNESS+1+FONT_HEIGHT*3,
+				KEY_X+KEY_W-1, KEY_Y+LINE_THICKNESS+1+FONT_HEIGHT*3+LINE_THICKNESS-1);
+
+			//Output area: draw up to 3 lines, SJIS-aware, track cursor pos
+			{
+				int px=0, row=0, cxrow=-1, cxpx=0;
+				i = 0;
+				while(out[i] && row < 3){
+					unsigned char c1 = (unsigned char)out[i];
+					unsigned short code = 0;
+					const unsigned char *g = NULL;
+					if(((c1 >= 0x81 && c1 <= 0x9F) || (c1 >= 0xE0 && c1 <= 0xEF)) && out[i+1]){
+						code = (c1 << 8) | (unsigned char)out[i+1];
+						g = cn_font_find(code);
+					}
+					x = g ? 16 : 8;
+					if(px + x > OUT_W){
+						px = 0;
+						row++;
+						continue;
+					}
+					if(i == cur){ cxrow = row; cxpx = px; }
+					if(g){
+						drawChar16(g, KEY_X+LINE_THICKNESS+3+px,
+							out_y+row*FONT_HEIGHT, setting->color[3]);
+						i += 2;
+					}else{
+						drawChar(c1, KEY_X+LINE_THICKNESS+3+px,
+							out_y+row*FONT_HEIGHT, setting->color[3]);
+						i++;
+					}
+					px += x;
+				}
+				if(i == cur && row < 3){ cxrow = row; cxpx = px; }
+				if(cxrow >= 0 && ((event|post_event)&4) && (t & 0x10)){
+					drawOpSprite(setting->color[2],
+						KEY_X + LINE_THICKNESS + 3 + cxpx,
+						out_y + cxrow*FONT_HEIGHT + 2,
+						KEY_X + LINE_THICKNESS + 3 + cxpx + LINE_THICKNESS - 1,
+						out_y + cxrow*FONT_HEIGHT + 2 + (FONT_HEIGHT-2) - 1);
+				}
+			}
+
+			//Pinyin input line
+			sprintf(tmp, "PY: %s_", py);
+			printXY(tmp, KEY_X+LINE_THICKNESS+3, py_y, setting->color[3], TRUE, 0);
+			if(sym_mode){
+				sprintf(tmp, "SYM %d/%d  SELECT:Back", sym_page+1, sym_pages);
+				printXY(tmp, KEY_X+KEY_W/2, py_y, setting->color[3], TRUE, 0);
+			}
+
+			//Candidate line (pinyin mode only)
+			if(!sym_mode && page_count > 0){
+				for(i = 0; i < page_count && i < 9; i++){
+					const unsigned char *g = cn_font_find(cand[i]);
+					if(g)
+						drawChar16(g, KEY_X+LINE_THICKNESS+3+i*18,
+							cand_y, setting->color[3]);
+				}
+				i = cand_idx % 9;
+				if(i < page_count)
+					drawFrame(KEY_X+LINE_THICKNESS+3+i*18-1, cand_y-1,
+						KEY_X+LINE_THICKNESS+3+i*18+16, cand_y+16, setting->color[2]);
+				sprintf(tmp, "%d/%d", cand_idx+1, cand_total);
+				printXY(tmp, KEY_X+KEY_W-LINE_THICKNESS-((int)strlen(tmp)+2)*FONT_WIDTH,
+					cand_y, setting->color[3], TRUE, 0);
+			}else if(!sym_mode){
+				printXY("PY: a-z, []:commit", KEY_X+LINE_THICKNESS+3, cand_y, setting->color[2], TRUE, 0);
+			}
+
+			//Key matrix
+			if(sym_mode){
+				for(i = 0; i < SYM_PAGE; i++){
+					int idx = sym_page*SYM_PAGE + i;
+					const unsigned char *g = (idx < CN_SYM_COUNT)
+						? cn_font_find(cn_sym_codes[idx]) : NULL;
+					if(g)
+						drawChar16(g,
+							KEY_X + LINE_THICKNESS + 8 + (i%SYM_W)*(CELL_W+2),
+							key_y + (i/SYM_W)*CELL_H, setting->color[3]);
+				}
+			}else{
+				for(i = 0; i < WFONTS*HFONTS; i++)
+					drawChar(KEY[i],
+						KEY_X + LINE_THICKNESS + 8 + (i%WFONTS)*CELL_W + (CELL_W-FONT_WIDTH)/2,
+						key_y + (i/WFONTS)*CELL_H + (CELL_H-FONT_HEIGHT)/2, setting->color[3]);
+			}
+			printXY("OK",
+				KEY_X + LINE_THICKNESS + 12,
+				ok_y, setting->color[3], TRUE, 0);
+			printXY("Cancel",
+				KEY_X + KEY_W - 1 - (strlen("Cancel")+2)*FONT_WIDTH,
+				ok_y, setting->color[3], TRUE, 0);
+
+			//Cursor positioning section
+			if(sym_mode)
+				x = KEY_X + LINE_THICKNESS + 8 + (sel%SYM_W)*(CELL_W+2) - 6;
+			else
+				x = KEY_X + LINE_THICKNESS + 8 + (sel%WFONTS)*CELL_W + (CELL_W-FONT_WIDTH)/2 - 8;
+			if(sel < WFONTS*HFONTS){
+				y = (sym_mode)
+					? key_y + (sel/SYM_W)*CELL_H
+					: key_y + (sel/WFONTS)*CELL_H + (CELL_H-FONT_HEIGHT)/2;
+			}else{
+				x = KEY_X + KEY_W - 2 - (strlen("Cancel")+3)*FONT_WIDTH;
+				y = ok_y;
+			}
+			drawChar(LEFT_CUR, x, y, setting->color[2]);
+
+			//Tooltip section
+			x = SCREEN_MARGIN;
+			y = Menu_tooltip_y;
+			drawSprite(setting->color[0], 0, y-1, SCREEN_WIDTH, y+FONT_HEIGHT);
+
+			if (swapKeys){
+				sprintf(tmp, "\xFF1:%s \xFF0", "In");
+			}else{
+				sprintf(tmp, "\xFF0:%s \xFF1", "In");
+			}
+			sprintf(tmp+strlen(tmp), ":%s \xFF2:%s L1/R1:%s SEL:%s START:%s \xFF3:%s",
+				"Del", "Sel", "Page", "Sym", "OK", "Exit");
+			printXY(tmp, x, y, setting->color[2], TRUE, 0);
+		}//ends if(event||post_event)
+		drawScr();
+		post_event = event;
+		event = 0;
+	}//ends while
+	return strlen(out);
+}
